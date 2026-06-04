@@ -1,18 +1,14 @@
 <div align="center">
-<h1 align="center">MoneyPrinterTurbo 💸</h1>
+<h1 align="center">AI-NewMedia 🎬</h1>
 
 <p align="center">
-  <a href="https://github.com/harry0703/MoneyPrinterTurbo/stargazers"><img src="https://img.shields.io/github/stars/harry0703/MoneyPrinterTurbo.svg?style=for-the-badge" alt="Stargazers"></a>
-  <a href="https://github.com/harry0703/MoneyPrinterTurbo/issues"><img src="https://img.shields.io/github/issues/harry0703/MoneyPrinterTurbo.svg?style=for-the-badge" alt="Issues"></a>
-  <a href="https://github.com/harry0703/MoneyPrinterTurbo/network/members"><img src="https://img.shields.io/github/forks/harry0703/MoneyPrinterTurbo.svg?style=for-the-badge" alt="Forks"></a>
-  <a href="https://github.com/harry0703/MoneyPrinterTurbo/blob/main/LICENSE"><img src="https://img.shields.io/github/license/harry0703/MoneyPrinterTurbo.svg?style=for-the-badge" alt="License"></a>
+  <a href="https://github.com/bruceleeu-creator/AI-NewMedia/stargazers"><img src="https://img.shields.io/github/stars/bruceleeu-creator/AI-NewMedia.svg?style=for-the-badge" alt="Stargazers"></a>
+  <a href="https://github.com/bruceleeu-creator/AI-NewMedia/issues"><img src="https://img.shields.io/github/issues/bruceleeu-creator/AI-NewMedia.svg?style=for-the-badge" alt="Issues"></a>
+  <a href="https://github.com/bruceleeu-creator/AI-NewMedia/forks"><img src="https://img.shields.io/github/forks/bruceleeu-creator/AI-NewMedia.svg?style=for-the-badge" alt="Forks"></a>
+  <a href="https://github.com/bruceleeu-creator/AI-NewMedia/blob/master/LICENSE"><img src="https://img.shields.io/github/license/bruceleeu-creator/AI-NewMedia.svg?style=for-the-badge" alt="License"></a>
 </p>
 
 <h3>English | <a href="README.md">简体中文</a></h3>
-
-<div align="center">
-  <a href="https://trendshift.io/repositories/8731" target="_blank"><img src="https://trendshift.io/api/badge/repositories/8731" alt="harry0703%2FMoneyPrinterTurbo | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-</div>
 
 Simply provide a <b>topic</b> or <b>keyword</b> for a video, and it will automatically generate the video copy, video
 materials, video subtitles, and video background music before synthesizing a high-definition short video.
@@ -59,8 +55,8 @@ materials, video subtitles, and video background music before synthesizing a hig
 </thead>
 <tbody>
 <tr>
-<td align="center"><video src="https://github.com/harry0703/MoneyPrinterTurbo/assets/4928832/a84d33d5-27a2-4aba-8fd0-9fb2bd91c6a6"></video></td>
-<td align="center"><video src="https://github.com/harry0703/MoneyPrinterTurbo/assets/4928832/112c9564-d52b-4472-99ad-970b75f66476"></video></td>
+<td align="center"><video src="https://github.com/bruceleeu-creator/AI-NewMedia/assets/4928832/a84d33d5-27a2-4aba-8fd0-9fb2bd91c6a6"></video></td>
+<td align="center"><video src="https://github.com/bruceleeu-creator/AI-NewMedia/assets/4928832/112c9564-d52b-4472-99ad-970b75f66476"></video></td>
 </tr>
 </tbody>
 </table>
@@ -76,8 +72,8 @@ materials, video subtitles, and video background music before synthesizing a hig
 </thead>
 <tbody>
 <tr>
-<td align="center"><video src="https://github.com/harry0703/MoneyPrinterTurbo/assets/4928832/346ebb15-c55f-47a9-a653-114f08bb8073"></video></td>
-<td align="center"><video src="https://github.com/harry0703/MoneyPrinterTurbo/assets/4928832/271f2fae-8283-44a0-8aa0-0ed8f9a6fa87"></video></td>
+<td align="center"><video src="https://github.com/bruceleeu-creator/AI-NewMedia/assets/4928832/346ebb15-c55f-47a9-a653-114f08bb8073"></video></td>
+<td align="center"><video src="https://github.com/bruceleeu-creator/AI-NewMedia/assets/4928832/271f2fae-8283-44a0-8aa0-0ed8f9a6fa87"></video></td>
 </tr>
 </tbody>
 </table>
@@ -105,9 +101,9 @@ materials, video subtitles, and video background music before synthesizing a hig
 - If you want a more isolated runtime: use Docker deployment
 
 ### Run in Google Colab 
-Want to try MoneyPrinterTurbo without setting up a local environment? Run it directly in Google Colab!
+Want to try AI-NewMedia without setting up a local environment? Run it directly in Google Colab!
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/harry0703/MoneyPrinterTurbo/blob/main/docs/MoneyPrinterTurbo.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/bruceleeu-creator/AI-NewMedia/blob/master/docs/MoneyPrinterTurbo.ipynb)
 
 
 ### Windows
@@ -131,7 +127,7 @@ One-click startup packages have not been created yet. See the **Installation & D
 #### ① Clone the Project
 
 ```shell
-git clone https://github.com/harry0703/MoneyPrinterTurbo.git
+git clone https://github.com/bruceleeu-creator/AI-NewMedia.git
 ```
 
 #### ② Modify the Configuration File
@@ -151,7 +147,7 @@ If you are using a Windows system, please refer to Microsoft's documentation:
 2. https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers
 
 ```shell
-cd MoneyPrinterTurbo
+cd AI-NewMedia
 docker-compose up
 ```
 
@@ -172,8 +168,8 @@ Open your browser and visit http://0.0.0.0:8080/docs Or http://0.0.0.0:8080/redo
 It is recommended to use [uv](https://docs.astral.sh/uv/) to manage the Python environment and dependencies, with Python `3.11` as the default runtime.
 
 ```shell
-git clone https://github.com/harry0703/MoneyPrinterTurbo.git
-cd MoneyPrinterTurbo
+git clone https://github.com/bruceleeu-creator/AI-NewMedia.git
+cd AI-NewMedia
 uv python install 3.11
 uv sync --frozen
 ```
@@ -219,7 +215,7 @@ sudo yum install ImageMagick
 
 #### ③ Launch the Web Interface 🌐
 
-Note that you need to execute the following commands in the `root directory` of the MoneyPrinterTurbo project
+Note that you need to execute the following commands in the `root directory` of the AI-NewMedia project
 
 ###### Windows
 
@@ -315,11 +311,11 @@ Download links:
 - Baidu Netdisk: https://pan.baidu.com/s/11h3Q6tsDtjQKTjUu3sc5cA?pwd=xjs9
 - Quark Netdisk: https://pan.quark.cn/s/3ee3d991d64b
 
-After downloading the model, extract it and place the entire directory in `.\MoneyPrinterTurbo\models`,
-The final file path should look like this: `.\MoneyPrinterTurbo\models\whisper-large-v3`
+After downloading the model, extract it and place the entire directory in `.\AI-NewMedia\models`,
+The final file path should look like this: `.\AI-NewMedia\models\whisper-large-v3`
 
 ```
-MoneyPrinterTurbo
+AI-NewMedia
   ├─models
   │   └─whisper-large-v3
   │          config.json
@@ -363,13 +359,13 @@ ffmpeg_path = "C:\\Users\\harry\\Downloads\\ffmpeg.exe"
 
 ### ❓ImageMagick is not installed on your computer
 
-[issue 33](https://github.com/harry0703/MoneyPrinterTurbo/issues/33)
+[issue 33](https://github.com/bruceleeu-creator/AI-NewMedia/issues/33)
 
 1. Follow the `example configuration` provided `download address` to
    install https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-30-Q16-x64-static.exe, using the static library
 2. Do not install in a path with Chinese characters to avoid unpredictable issues
 
-[issue 54](https://github.com/harry0703/MoneyPrinterTurbo/issues/54#issuecomment-2017842022)
+[issue 54](https://github.com/bruceleeu-creator/AI-NewMedia/issues/54#issuecomment-2017842022)
 
 For Linux systems, you can manually install it, refer to https://cn.linux-console.net/?p=16978
 
@@ -414,8 +410,8 @@ Solution: [Click to see how to manually download the model from netdisk](#subtit
 
 ## Feedback & Suggestions 📢
 
-- You can submit an [issue](https://github.com/harry0703/MoneyPrinterTurbo/issues) or
-  a [pull request](https://github.com/harry0703/MoneyPrinterTurbo/pulls).
+- You can submit an [issue](https://github.com/bruceleeu-creator/AI-NewMedia/issues) or
+  a [pull request](https://github.com/bruceleeu-creator/AI-NewMedia/pulls).
 
 ## License 📝
 
@@ -423,4 +419,4 @@ Click to view the [`LICENSE`](LICENSE) file
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=harry0703/MoneyPrinterTurbo&type=Date)](https://star-history.com/#harry0703/MoneyPrinterTurbo&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=bruceleeu-creator/AI-NewMedia&type=Date)](https://star-history.com/#bruceleeu-creator/AI-NewMedia&Date)
