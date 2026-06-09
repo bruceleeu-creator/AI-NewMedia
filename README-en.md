@@ -40,6 +40,73 @@ The project includes a softer, low-contrast WebUI designed for repeated script, 
 - [x] HD **royalty-free** video materials, with support for **local materials**
 - [x] Supports integration with **OpenAI**, **Moonshot**, **Azure**, **gpt4free**, **one-api**, **Qwen**, **Google Gemini**, **Ollama**, **DeepSeek**, **MiniMax**, **ERNIE**, **Pollinations**, **ModelScope** and more
 
+## Architecture & WebUI Optimization 🧭
+
+AI-NewMedia keeps `Streamlit WebUI` as the real frontend. It does not split the product into a separate React / Vue app. The WebUI directly calls `app.services` for scripts, materials, voice, subtitles, and video composition. FastAPI remains a parallel API entry for API clients, and both entries share the same service layer.
+
+### Current Architecture
+
+```mermaid
+flowchart TB
+    U["Creator"] --> SW["Streamlit WebUI\nwebui/Main.py"]
+
+    SW --> Cfg["Config read/write\nconfig.toml / config.ui / config.app"]
+    SW --> LLM["LLM service\napp.services.llm"]
+    SW --> Voice["TTS service\napp.services.voice"]
+    SW --> Task["Task orchestration\napp.services.task"]
+    SW --> Upload["Local media/audio upload\nStreamlit uploader"]
+
+    Task --> Script["Generate/read script"]
+    Task --> Terms["Generate keywords"]
+    Task --> Audio["Generate voice/read custom audio"]
+    Task --> Subtitle["Generate subtitles"]
+    Task --> Material["Download or preprocess materials"]
+    Task --> Video["Compose final video"]
+    Task --> Storage["storage/tasks output files"]
+
+    APIUser["API client"] --> FastAPI["FastAPI\napp.asgi / app.router"]
+    FastAPI --> Controllers["controllers/v1"]
+    Controllers --> Task
+    FastAPI --> Public["/tasks static outputs\n/resource/public static page"]
+
+    note1["Note: the WebUI does not call FastAPI over HTTP;\nit calls services directly."] -.-> SW
+    note2["Note: FastAPI and WebUI are parallel entries\nsharing one business service layer."] -.-> Task
+    note3["Note: UX pain points are mainly form density,\nfirst-run guidance, preflight hints, and visual contrast."] -.-> SW
+```
+
+### Target Optimization Architecture
+
+```mermaid
+flowchart TB
+    U["Creator"] --> UI["Streamlit workspace\nsoft light tea-green theme"]
+
+    UI --> Top["Top area\nproject name / language / quick status"]
+    UI --> Guide["Quick-start guide\nlocal materials first / online materials first"]
+    UI --> Preflight["Preflight area\nconfig / API keys / ffmpeg / ImageMagick"]
+    UI --> Form["Three-column generation form\nscript / video-audio / subtitles"]
+    UI --> Action["Generation area\nprimary button / validation / logs / preview"]
+
+    Form --> State["Session State\nscript, keywords, local material cache"]
+    Action --> Services["Shared service layer\nllm / voice / material / subtitle / video / task"]
+    Services --> Storage["storage/tasks\naudio, subtitles, final videos"]
+
+    API["FastAPI API entry"] --> Services
+
+    why1["Why: keeping Streamlit improves the real UI\nwithout rewriting the business workflow."] -.-> UI
+    why2["Why: first-run mode selection reduces failures\ncaused by missing material API keys."] -.-> Guide
+    why3["Why: preflight exposes API key and runtime issues\nbefore clicking Generate."] -.-> Preflight
+    why4["Why: the three-column layout preserves the workflow\nwhile reducing visual load."] -.-> Form
+    why5["Why: FastAPI interfaces stay unchanged,\nprotecting existing API clients and tests."] -.-> API
+```
+
+Optimization focus:
+
+- Use a soft, low-contrast tea-green light theme instead of dark or high-contrast controls.
+- Add a quick-start area that defaults to local materials first, so first-time users can run the flow without Pexels / Pixabay keys.
+- Add startup preflight checks for `config.toml`, LLM keys, material keys, ffmpeg, and ImageMagick without blocking manual scripts or local uploads.
+- Keep the three-column business form and improve hierarchy, spacing, card boundaries, and scanability.
+- Keep FastAPI routes, API schemas, and `app.services` compatible.
+
 ## System Requirements 📦
 
 - Recommended platforms: Windows 10+, macOS 11+, or a mainstream Linux distribution
@@ -56,23 +123,57 @@ The project includes a softer, low-contrast WebUI designed for repeated script, 
 
 ## Quick Start 🚀
 
-### Installation & Deployment 📥
+### Recommended Path: One-Click WebUI Startup
 
-#### Prerequisites
+AI-NewMedia's default entry is the WebUI. For the first run, use "local materials first": upload local images or videos and run the workflow without applying for Pexels / Pixabay keys first.
 
-- Avoid using **Chinese characters** in the project path to prevent unexpected issues
-- Ensure your **network** is stable
-
-##### ① Clone the Project
+#### ① Clone the Project
 
 ```shell
 git clone https://github.com/bruceleeu-creator/AI-NewMedia.git
+cd AI-NewMedia
 ```
 
-##### ② Configure (Optional)
+#### ② Install uv and Python Dependencies
 
-- Copy `config.example.toml` and rename it to `config.toml`
-- Configure `pexels_api_keys` and `llm_provider`, along with the corresponding API Key
+Recommended: use [uv](https://docs.astral.sh/uv/) with Python `3.11`.
+
+```shell
+uv python install 3.11
+uv sync --frozen
+```
+
+#### ③ Start the WebUI
+
+macOS / Linux:
+
+```shell
+sh start-webui.sh
+```
+
+Windows:
+
+```bat
+start-webui.bat
+```
+
+The launcher will:
+
+- Create `config.toml` from `config.example.toml` when missing
+- Check LLM, material source, TTS, ffmpeg, and ImageMagick status
+- Try the next available port when `8501` is occupied
+- Print the WebUI URL
+
+#### ④ Generate Your First Video
+
+In the WebUI, start with **local materials first**:
+
+1. Upload local images or videos
+2. Enter a video subject, or paste a finished script
+3. Choose voice, subtitles, and background music
+4. Click **Generate Video**
+
+Switch to **online materials first** only when you want automatic material search, then add a Pexels or Pixabay API key in Basic Settings.
 
 ### Docker Deployment 🐳
 
@@ -144,7 +245,7 @@ Run from the project **root directory**:
 
 **Windows:**
 ```shell
-uv run streamlit run ./webui/Main.py --browser.gatherUsageStats=False
+uv run python scripts/start_webui.py
 ```
 Or if virtual env is active:
 ```bat
@@ -153,7 +254,7 @@ webui.bat
 
 **MacOS or Linux:**
 ```shell
-uv run streamlit run ./webui/Main.py --browser.gatherUsageStats=False
+uv run python scripts/start_webui.py
 ```
 Or if virtual env is active:
 ```shell

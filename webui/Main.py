@@ -26,6 +26,7 @@ from app.models.schema import (
 from app.services import llm, voice
 from app.services import task as tm
 from app.utils import utils
+from webui import onboarding, runtime_check
 
 st.set_page_config(
     page_title="AI-NewMedia",
@@ -130,6 +131,18 @@ h1 {
     background: #f1f4ec !important;
 }
 
+[data-testid="stAlert"] {
+    border-color: rgba(95, 143, 102, 0.16) !important;
+    border-radius: 8px !important;
+    background: rgba(229, 239, 222, 0.72) !important;
+    color: var(--anm-ink) !important;
+}
+
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] div {
+    color: var(--anm-ink) !important;
+}
+
 .anm-section-title {
     display: flex;
     align-items: baseline;
@@ -226,6 +239,12 @@ if "ui_language" not in st.session_state:
 if "local_video_materials" not in st.session_state:
     # 记住用户最近一次已经落盘的本地素材，避免仅修改文案后二次生成时丢失素材列表。
     st.session_state["local_video_materials"] = []
+if "quick_start_mode" not in st.session_state:
+    st.session_state["quick_start_mode"] = onboarding.mode_for_video_source(
+        config.app.get("video_source", "local")
+    )
+if "quick_start_mode_applied" not in st.session_state:
+    st.session_state["quick_start_mode_applied"] = st.session_state["quick_start_mode"]
 
 # 加载语言文件
 locales = utils.load_locales(i18n_dir)
@@ -366,6 +385,57 @@ locales = utils.load_locales(i18n_dir)
 def tr(key):
     loc = locales.get(st.session_state["ui_language"], {})
     return loc.get("Translation", {}).get(key, key)
+
+
+def render_quick_start_panel():
+    with st.container(border=True):
+        render_section_title(tr("Quick Start"), "START")
+        mode_options = [
+            (tr("Local Materials First"), "local"),
+            (tr("Online Materials First"), "online"),
+        ]
+        mode_labels = {value: label for label, value in mode_options}
+        mode = st.radio(
+            tr("Choose a startup mode"),
+            options=["local", "online"],
+            format_func=lambda x: mode_labels[x],
+            horizontal=True,
+            help=tr("Quick Start Help"),
+            key="quick_start_mode",
+        )
+        recommended_source = onboarding.source_for_mode_change(
+            st.session_state.get("quick_start_mode_applied"),
+            mode,
+        )
+        if recommended_source:
+            config.app["video_source"] = recommended_source
+            st.session_state["quick_start_mode_applied"] = mode
+        st.info(
+            tr("Local Materials First Description")
+            if mode == "local"
+            else tr("Online Materials First Description")
+        )
+
+
+def render_preflight_panel():
+    report = runtime_check.build_preflight_report(
+        root_dir=os.path.abspath(root_dir),
+        config_data={"app": config.app, "ui": config.ui},
+    )
+    with st.expander(tr("Startup Preflight"), expanded=True):
+        st.caption(report.summary)
+        status_icon = {"ok": "OK", "warning": "WARN", "error": "ERR"}
+        cols = st.columns(3)
+        for index, check in enumerate(report.checks):
+            with cols[index % 3]:
+                st.markdown(f"**{status_icon[check.status]} · {check.title}**")
+                st.caption(check.message)
+                if check.action:
+                    st.caption(check.action)
+
+
+render_quick_start_panel()
+render_preflight_panel()
 
 
 # 创建基础设置折叠框
@@ -814,6 +884,8 @@ with middle_panel:
         ]
 
         saved_video_source_name = config.app.get("video_source", "pexels")
+        if saved_video_source_name not in [v[1] for v in video_sources]:
+            saved_video_source_name = "local"
         saved_video_source_index = [v[1] for v in video_sources].index(
             saved_video_source_name
         )
@@ -1253,7 +1325,7 @@ with right_panel:
             st.subheader("Pexels API Keys")
             if config.app["pexels_api_keys"]:
                 st.write(tr("Current Keys:"))
-                for key in config.app["pexels_api_keys"]:
+                for key in onboarding.mask_key_list(config.app["pexels_api_keys"]):
                     st.code(key)
             else:
                 st.info(tr("No Pexels API Keys currently"))
@@ -1283,7 +1355,7 @@ with right_panel:
 
             if config.app["pixabay_api_keys"]:
                 st.write(tr("Current Keys:"))
-                for key in config.app["pixabay_api_keys"]:
+                for key in onboarding.mask_key_list(config.app["pixabay_api_keys"]):
                     st.code(key)
             else:
                 st.info(tr("No Pixabay API Keys currently"))

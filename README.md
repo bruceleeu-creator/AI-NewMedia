@@ -42,6 +42,73 @@ AI-NewMedia 是一个面向新媒体内容生产的 AI 短视频生成工作台�
 - [x] 支持 **OpenAI**、**Moonshot**、**Azure**、**gpt4free**、**one-api**、**通义千问**、**Google Gemini**、**Ollama**、**DeepSeek**、**MiniMax**、 **文心一言**, **Pollinations**、**ModelScope** 等多种模型接入
     - 中国用户建议使用 **DeepSeek** 或 **Moonshot** 作为大模型提供商（国内可直接访问，不需要VPN。注册就送额度，基本够用）
 
+## 架构与前端优化方案 🧭
+
+本项目保留 `Streamlit WebUI` 作为真实前端入口，不拆独立 React / Vue。WebUI 直接调用 `app.services` 完成文案、素材、语音、字幕和视频合成；FastAPI 主要面向 API 调用方，两者共享同一套业务服务层。
+
+### 当前架构
+
+```mermaid
+flowchart TB
+    U["用户 / 创作者"] --> SW["Streamlit WebUI\nwebui/Main.py"]
+
+    SW --> Cfg["配置读取/写入\nconfig.toml / config.ui / config.app"]
+    SW --> LLM["LLM 服务\napp.services.llm"]
+    SW --> Voice["TTS 服务\napp.services.voice"]
+    SW --> Task["任务编排\napp.services.task"]
+    SW --> Upload["本地素材/音频上传\nStreamlit uploader"]
+
+    Task --> Script["生成/读取文案"]
+    Task --> Terms["生成关键词"]
+    Task --> Audio["生成语音/读取自定义音频"]
+    Task --> Subtitle["生成字幕"]
+    Task --> Material["下载或预处理素材"]
+    Task --> Video["合成最终视频"]
+    Task --> Storage["storage/tasks 输出文件"]
+
+    APIUser["API 调用方"] --> FastAPI["FastAPI\napp.asgi / app.router"]
+    FastAPI --> Controllers["controllers/v1"]
+    Controllers --> Task
+    FastAPI --> Public["/tasks 静态产物\n/resource/public 静态页"]
+
+    note1["批注：WebUI 当前不是通过 HTTP 调 FastAPI，\n而是直接调用 services。"] -.-> SW
+    note2["批注：FastAPI 和 WebUI 是并行入口，\n共享同一业务服务层。"] -.-> Task
+    note3["批注：前端体验问题主要集中在\n表单密度、启动引导、预检提示、视觉对比度。"] -.-> SW
+```
+
+### 优化后目标架构
+
+```mermaid
+flowchart TB
+    U["用户 / 创作者"] --> UI["Streamlit 工作台\n柔和浅色茶绿主题"]
+
+    UI --> Top["顶部区\n项目名 / 语言 / 快速状态"]
+    UI --> Guide["启动引导区\n本地素材优先 / 在线素材优先"]
+    UI --> Preflight["预检区\n配置 / API Key / ffmpeg / ImageMagick"]
+    UI --> Form["三栏生成表单\n文案 / 视频音频 / 字幕"]
+    UI --> Action["底部生成操作区\n主按钮 / 校验 / 日志 / 结果预览"]
+
+    Form --> State["Session State\n脚本、关键词、本地素材缓存"]
+    Action --> Services["共享业务服务层\nllm / voice / material / subtitle / video / task"]
+    Services --> Storage["storage/tasks\n音频、字幕、合成视频"]
+
+    API["FastAPI API 入口"] --> Services
+
+    why1["为什么：保留 Streamlit 可最小风险优化真实界面，\n不重写业务链路。"] -.-> UI
+    why2["为什么：启动引导先让用户选择本地/在线素材，\n降低第一次使用失败率。"] -.-> Guide
+    why3["为什么：预检提前暴露 API Key、ffmpeg 等问题，\n避免点击生成后才失败。"] -.-> Preflight
+    why4["为什么：三栏结构保留原工作流，\n只优化视觉层级和阅读负担。"] -.-> Form
+    why5["为什么：FastAPI 不改接口，\n避免破坏已有 API 用户和测试。"] -.-> API
+```
+
+优化重点：
+
+- 固定浅色低对比茶绿色主题，减少黑色控件和强对比造成的阅读负担。
+- 顶部增加快速启动模式，默认推荐本地素材优先，降低第一次使用时因素材 API Key 缺失导致的失败率。
+- 启动预检提前提示 `config.toml`、大模型 API Key、素材源 API Key、ffmpeg、ImageMagick 等状态，但不阻塞手动填写文案或上传本地素材。
+- 保留三栏业务表单，只优化标题、间距、卡片边界和可扫描性，避免打断原有使用习惯。
+- FastAPI 路由、接口 schema 和 `app.services` 服务层保持兼容，降低回归风险。
+
 ## 配置要求 📦
 
 - 建议系统：Windows 10 或 MacOS 11.0 以上，或主流 Linux 发行版
@@ -59,33 +126,58 @@ AI-NewMedia 是一个面向新媒体内容生产的 AI 短视频生成工作台�
 
 ## 快速开始 🚀
 
-### 推荐使用方式
+### 推荐路径：一键启动 WebUI
 
-- Windows 用户：优先使用一键启动包，适合快速体验
-- MacOS / Linux 用户：优先使用 `uv sync --frozen` 进行本地部署
-- 想要隔离运行环境：优先使用 Docker 部署
+AI-NewMedia 的默认入口是 WebUI。第一次使用建议先走“本地素材快速体验”：不用先申请 Pexels / Pixabay Key，上传图片或视频即可先跑通一条生成链路。
 
-### 安装部署 📥
-
-#### 前提条件
-
-- 尽量不要使用 **中文路径**，避免出现一些无法预料的问题
-- 请确保你的 **网络** 是正常的
-
-##### ① 克隆代码
+#### ① 克隆代码
 
 ```shell
 git clone https://github.com/bruceleeu-creator/AI-NewMedia.git
+cd AI-NewMedia
 ```
 
-##### ② 修改配置文件（可选，建议启动后也可以在 WebUI 里面配置）
+#### ② 安装 uv 和 Python 依赖
 
-- 将 `config.example.toml` 文件复制一份，命名为 `config.toml`
-- 按照 `config.toml` 文件中的说明，配置好 `pexels_api_keys` 和 `llm_provider`，并根据 llm_provider 对应的服务商，配置相关的 API Key
+推荐使用 [uv](https://docs.astral.sh/uv/) 管理 Python 环境，默认使用 Python `3.11`。
 
-### Docker部署 🐳
+```shell
+uv python install 3.11
+uv sync --frozen
+```
 
-#### ① 启动Docker
+#### ③ 一键启动 WebUI
+
+MacOS / Linux:
+
+```shell
+sh start-webui.sh
+```
+
+Windows:
+
+```bat
+start-webui.bat
+```
+
+启动器会自动：
+- 如果缺少 `config.toml`，从 `config.example.toml` 复制一份
+- 检查大模型、素材源、TTS、ffmpeg、ImageMagick 等基础状态
+- 遇到 `8501` 端口占用时自动尝试后续端口
+- 打印可访问的 WebUI 地址
+
+#### ④ 第一次生成视频
+
+打开 WebUI 后，优先选择顶部的 **本地素材快速体验**：
+
+1. 上传本地图片或视频素材
+2. 填写视频主题，或者直接粘贴视频文案
+3. 选择语音、字幕和背景音乐
+4. 点击 **生成视频**
+
+如果你想让系统自动找素材，再切换到 **在线素材全自动生成**，并在基础设置中填写 Pexels 或 Pixabay API Key。
+
+### 高级方式：Docker 部署 🐳
 
 如果未安装 Docker，请先安装 https://www.docker.com/products/docker-desktop/
 
@@ -101,15 +193,15 @@ docker-compose up
 
 > 注意：最新版的docker安装时会自动以插件的形式安装docker compose，启动命令调整为docker compose up
 
-#### ② 访问Web界面
+访问 WebUI:
 
-打开浏览器，访问 http://0.0.0.0:8501
+打开浏览器，访问 http://127.0.0.1:8501
 
-#### ③ 访问API文档
+访问 API 文档:
 
-打开浏览器，访问 http://0.0.0.0:8080/docs 或者 http://0.0.0.0:8080/redoc
+打开浏览器，访问 http://127.0.0.1:8080/docs 或者 http://127.0.0.1:8080/redoc
 
-### 手动部署 📦
+### 高级方式：手动部署 📦
 
 #### ① 创建虚拟环境
 
@@ -162,7 +254,7 @@ pip install -r requirements.txt
 ###### Windows
 
 ```shell
-uv run streamlit run ./webui/Main.py --browser.gatherUsageStats=False
+uv run python scripts/start_webui.py
 ```
 
 如果你已经手动激活了虚拟环境，也可以直接执行：
@@ -174,7 +266,7 @@ webui.bat
 ###### MacOS or Linux
 
 ```shell
-uv run streamlit run ./webui/Main.py --browser.gatherUsageStats=False
+uv run python scripts/start_webui.py
 ```
 
 如果你已经手动激活了虚拟环境，也可以直接执行：

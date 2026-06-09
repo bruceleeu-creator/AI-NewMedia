@@ -2,12 +2,12 @@
 FROM python:3.11-slim-bullseye
 
 # Set the working directory in the container
-WORKDIR /MoneyPrinterTurbo
+WORKDIR /AI-NewMedia
 
-# 设置/MoneyPrinterTurbo目录权限为777
-RUN chmod 777 /MoneyPrinterTurbo
+# 设置 /AI-NewMedia 目录权限为 777
+RUN chmod 777 /AI-NewMedia
 
-ENV PYTHONPATH="/MoneyPrinterTurbo"
+ENV PYTHONPATH="/AI-NewMedia"
 
 # Install system dependencies with domestic mirrors first for stability
 RUN echo "deb http://mirrors.aliyun.com/debian bullseye main" > /etc/apt/sources.list && \
@@ -65,10 +65,10 @@ EXPOSE 8501
 CMD ["streamlit", "run", "./webui/Main.py","--browser.serverAddress=127.0.0.1","--server.enableCORS=True","--browser.gatherUsageStats=False"]
 
 # 1. Build the Docker image using the following command
-# docker build -t moneyprinterturbo .
+# docker build -t ai-newmedia .
 
 # 2. Run the Docker container using the following command
 ## For Linux or MacOS:
-# docker run -v $(pwd)/config.toml:/MoneyPrinterTurbo/config.toml -v $(pwd)/storage:/MoneyPrinterTurbo/storage -p 8501:8501 moneyprinterturbo
+# docker run -v $(pwd)/config.toml:/AI-NewMedia/config.toml -v $(pwd)/storage:/AI-NewMedia/storage -p 8501:8501 ai-newmedia
 ## For Windows:
-# docker run -v ${PWD}/config.toml:/MoneyPrinterTurbo/config.toml -v ${PWD}/storage:/MoneyPrinterTurbo/storage -p 8501:8501 moneyprinterturbo
+# docker run -v ${PWD}/config.toml:/AI-NewMedia/config.toml -v ${PWD}/storage:/AI-NewMedia/storage -p 8501:8501 ai-newmedia
