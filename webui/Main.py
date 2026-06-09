@@ -1,6 +1,7 @@
 import os
 import sys
 import webbrowser
+from html import escape
 from uuid import UUID, uuid4
 
 import streamlit as st
@@ -27,24 +28,174 @@ from app.services import task as tm
 from app.utils import utils
 
 st.set_page_config(
-    page_title="MoneyPrinterTurbo",
-    page_icon="🤖",
+    page_title="AI-NewMedia",
+    page_icon="🍵",
     layout="wide",
     initial_sidebar_state="auto",
     menu_items={
-        "Report a bug": "https://github.com/harry0703/MoneyPrinterTurbo/issues",
-        "About": "# MoneyPrinterTurbo\nSimply provide a topic or keyword for a video, and it will "
+        "Report a bug": "https://github.com/bruceleeu-creator/AI-NewMedia/issues",
+        "About": "# AI-NewMedia\nSimply provide a topic or keyword for a video, and it will "
         "automatically generate the video copy, video materials, video subtitles, "
         "and video background music before synthesizing a high-definition short "
-        "video.\n\nhttps://github.com/harry0703/MoneyPrinterTurbo",
+        "video.\n\nhttps://github.com/bruceleeu-creator/AI-NewMedia",
     },
 )
 
 
+def plain_label(text):
+    return str(text).replace("**", "").strip()
+
+
+def render_section_title(title, eyebrow):
+    st.markdown(
+        f"""
+        <div class="anm-section-title">
+            <span>{escape(eyebrow)}</span>
+            <strong>{escape(plain_label(title))}</strong>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 streamlit_style = """
 <style>
+:root {
+    --anm-ink: #243b31;
+    --anm-muted: #718177;
+    --anm-leaf: #5f8f66;
+    --anm-paper: #f6f8f1;
+    --anm-card: rgba(255, 253, 246, 0.92);
+    --anm-line: rgba(95, 143, 102, 0.16);
+    --anm-shadow: 0 10px 26px rgba(57, 88, 64, 0.07);
+}
+
+[data-testid="stAppViewContainer"] {
+    background:
+        radial-gradient(circle at 8% 0%, rgba(178, 203, 164, 0.2), transparent 30rem),
+        linear-gradient(135deg, #f6f8f1 0%, #fffdf6 52%, #f0f5eb 100%);
+}
+
+[data-testid="stHeader"] {
+    background: rgba(250, 251, 245, 0.86) !important;
+    border-bottom: 1px solid rgba(95, 143, 102, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.block-container {
+    max-width: 1480px;
+    padding-top: 2rem !important;
+    padding-bottom: 3.5rem !important;
+}
+
 h1 {
     padding-top: 0 !important;
+    color: var(--anm-ink) !important;
+    letter-spacing: 0;
+    margin-bottom: 0.6rem !important;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"] {
+    border-color: var(--anm-line) !important;
+    border-radius: 8px !important;
+    background: var(--anm-card) !important;
+    box-shadow: var(--anm-shadow);
+}
+
+[data-testid="stExpander"] {
+    border-color: var(--anm-line) !important;
+    border-radius: 8px !important;
+    background: rgba(255, 253, 246, 0.82) !important;
+}
+
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea,
+[data-baseweb="select"] > div {
+    border: 1px solid rgba(95, 143, 102, 0.18) !important;
+    border-radius: 8px !important;
+    background: #f1f4ec !important;
+    color: var(--anm-ink) !important;
+}
+
+[data-testid="stTextInput"] input:focus,
+[data-testid="stTextArea"] textarea:focus,
+[data-baseweb="select"] > div:focus-within {
+    border-color: rgba(95, 143, 102, 0.42) !important;
+    box-shadow: 0 0 0 3px rgba(95, 143, 102, 0.12) !important;
+}
+
+[data-testid="stFileUploader"] section {
+    border-color: rgba(95, 143, 102, 0.18) !important;
+    border-radius: 8px !important;
+    background: #f1f4ec !important;
+}
+
+.anm-section-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(95, 143, 102, 0.14);
+}
+
+.anm-section-title span {
+    color: var(--anm-leaf);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.anm-section-title strong {
+    color: var(--anm-ink);
+    font-size: 1.05rem;
+    font-weight: 800;
+    text-align: right;
+}
+
+.stButton > button {
+    border-radius: 8px !important;
+    border-color: rgba(95, 143, 102, 0.28) !important;
+    color: var(--anm-leaf) !important;
+    font-weight: 750 !important;
+    box-shadow: none !important;
+}
+
+.stButton > button:hover {
+    border-color: var(--anm-leaf) !important;
+    color: var(--anm-ink) !important;
+}
+
+.stButton > button[kind="primary"],
+.stButton > button[data-testid="baseButton-primary"] {
+    min-height: 3rem;
+    border: 0 !important;
+    background: #5f8f66 !important;
+    color: #fffdf2 !important;
+    box-shadow: 0 10px 22px rgba(95, 143, 102, 0.2) !important;
+}
+
+a {
+    color: var(--anm-leaf) !important;
+}
+
+@media (max-width: 900px) {
+    .block-container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .anm-section-title {
+        display: block;
+    }
+
+    .anm-section-title strong {
+        display: block;
+        margin-top: 0.15rem;
+        text-align: left;
+    }
 }
 </style>
 """
@@ -83,7 +234,7 @@ locales = utils.load_locales(i18n_dir)
 title_col, lang_col = st.columns([3, 1])
 
 with title_col:
-    st.title(f"MoneyPrinterTurbo v{config.project_version}")
+    st.title(f"AI-NewMedia v{config.project_version}")
 
 with lang_col:
     display_languages = []
@@ -242,7 +393,7 @@ if not config.app.get("hide_config", False):
         # 中间面板 - LLM 设置
 
         with middle_config_panel:
-            st.write(tr("LLM Settings"))
+            render_section_title(tr("LLM Settings"), "LLM")
             llm_providers = [
                 "OpenAI",
                 "Moonshot",
@@ -300,8 +451,8 @@ if not config.app.get("hide_config", False):
                             ##### Ollama配置说明
                             - **API Key**: 随便填写，比如 123
                             - **Base Url**: 一般为 http://localhost:11434/v1
-                                - 如果 `MoneyPrinterTurbo` 和 `Ollama` **不在同一台机器上**，需要填写 `Ollama` 机器的IP地址
-                                - 如果 `MoneyPrinterTurbo` 是 `Docker` 部署，建议填写 `http://host.docker.internal:11434/v1`{docker_hint}
+                                - 如果 `AI-NewMedia` 和 `Ollama` **不在同一台机器上**，需要填写 `Ollama` 机器的IP地址
+                                - 如果 `AI-NewMedia` 是 `Docker` 部署，建议填写 `http://host.docker.internal:11434/v1`{docker_hint}
                             - **Model Name**: 使用 `ollama list` 查看，比如 `qwen:7b`
                             """
 
@@ -525,7 +676,7 @@ if not config.app.get("hide_config", False):
                 if value:
                     config.app[cfg_key] = value.split(",")
 
-            st.write(tr("Video Source Settings"))
+            render_section_title(tr("Video Source Settings"), "API")
 
             pexels_api_key = get_keys_from_config("pexels_api_keys")
             pexels_api_key = st.text_input(
@@ -551,7 +702,7 @@ uploaded_audio_file = None
 
 with left_panel:
     with st.container(border=True):
-        st.write(tr("Video Script Settings"))
+        render_section_title(tr("Video Script Settings"), "01")
         params.video_subject = st.text_input(
             tr("Video Subject"),
             key="video_subject",
@@ -648,7 +799,7 @@ with left_panel:
 
 with middle_panel:
     with st.container(border=True):
-        st.write(tr("Video Settings"))
+        render_section_title(tr("Video Settings"), "02")
         video_concat_modes = [
             (tr("Sequential"), "sequential"),
             (tr("Random"), "random"),
@@ -742,7 +893,7 @@ with middle_panel:
             index=0,
         )
     with st.container(border=True):
-        st.write(tr("Audio Settings"))
+        render_section_title(tr("Audio Settings"), "03")
 
         # 添加TTS服务器选择下拉框
         tts_servers = [
@@ -1017,7 +1168,7 @@ with middle_panel:
 
 with right_panel:
     with st.container(border=True):
-        st.write(tr("Subtitle Settings"))
+        render_section_title(tr("Subtitle Settings"), "04")
         params.subtitle_enabled = st.checkbox(tr("Enable Subtitles"), value=True)
         font_names = get_all_fonts()
         saved_font_name = config.ui.get("font_name", "MicrosoftYaHeiBold.ttc")

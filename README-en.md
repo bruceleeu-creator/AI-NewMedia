@@ -10,7 +10,9 @@
 
 <h3>English | <a href="README.md">简体中文</a></h3>
 
-Simply provide a <b>topic</b> or <b>keyword</b> for a video, and it will automatically generate the video script, video materials, subtitles, and background music before synthesizing a high-definition short video.
+AI-NewMedia is an AI short-video production workspace for new media creators. Provide a <b>topic</b> or <b>keyword</b>, then generate scripts, materials, subtitles, voice, background music, and final HD short videos in one workflow.
+
+The project includes a softer, low-contrast WebUI designed for repeated script, media, voice, and subtitle tuning.
 
 ### WebUI
 
